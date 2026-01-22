@@ -1,26 +1,23 @@
 package com.api.hateoas.controller;
-
 import com.api.hateoas.dto.CuentaDto;
 import com.api.hateoas.model.Cuenta;
 import com.api.hateoas.service.CuentaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/cuentas")
 public class CuentaController {
 
-    @Autowired
-    private CuentaService cuentaService;
+    private final CuentaService cuentaService;
+
+    public CuentaController(CuentaService cuentaService) {this.cuentaService = cuentaService;}
 
     @GetMapping("/listar-cuentas")
     public ResponseEntity<List<Cuenta>> listarCuentas() {
         List<Cuenta> cuentas = cuentaService.listAll();
-
         if (cuentas.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -44,7 +41,6 @@ public class CuentaController {
         return new ResponseEntity<>(cuenta, HttpStatus.CREATED);
     }
 
-    //VERSION 2
     @PostMapping("/guardar-con-dto")
     public ResponseEntity guardarCuenta2(@RequestBody CuentaDto cuentaDto){
         Cuenta cuentaBBDD = cuentaService.save2(cuentaDto);
