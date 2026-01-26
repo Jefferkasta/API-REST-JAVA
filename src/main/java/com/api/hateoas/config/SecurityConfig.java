@@ -17,16 +17,11 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(true))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/**"
+                                "/auth/**",
+                                "/api/**"
                        )
                         .permitAll()
                         .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage("/auth/login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/home", true)
-                        .permitAll())
 
                 .build();
     }

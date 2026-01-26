@@ -1,30 +1,32 @@
-package com.api.hateoas.service;
 
-import com.api.hateoas.dto.CuentaDto;
+package com.api.hateoas.service;
 import com.api.hateoas.dto.LoginDto;
+import com.api.hateoas.dto.LoginResponse;
 import com.api.hateoas.dto.RegisterDto;
-import com.api.hateoas.model.Cuenta;
+import com.api.hateoas.exceptions.AuthInvalidValueException;
+import com.api.hateoas.exceptions.AuthenticationNotFound;
 import com.api.hateoas.model.UserModel;
-import com.api.hateoas.repository.CuentaRepository;
 import com.api.hateoas.repository.UserJpa;
 import com.api.hateoas.util.Role;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.Objects;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 @Service
 public class AuthService {
 
     private final UserJpa userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticateUser;
 
-    public AuthService(UserJpa userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserJpa userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticateUser) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticateUser = authenticateUser;
     }
 
     public RegisterDto save(RegisterDto registerDto){
@@ -49,32 +51,32 @@ public class AuthService {
         return toRegisterDto;
     }
 
-    //LOGIN DTO CON GEMINI
-    public LoginDto login(LoginDto loginDto) {
-        // 1. BUSCAR al usuario en la DB por su email
-        // Usamos el repositorio (UserJpa/userRepository)
-        //UserModel userModel = userRepository.findByEmail(loginDto.getEmail());
-        Optional<UserModel> userModel = userRepository.findByEmail(loginDto.getEmail());
+    public LoginResponse login(LoginDto loginDto) {
+        String pass = loginDto.getPassword();
+        String email = loginDto.getEmail();
 
-        // 2. VALIDAR si el usuario existe
-        if (userModel == null) {
-            return null; // O puedes lanzar una excepción personalizada
+        if (email == null || pass ==  null){
+            throw  new AuthInvalidValueException("email o pass no pueden ser vacios");
         }
 
-        // 3. COMPARAR contraseñas
-        // El passwordEncoder compara la clave plana del DTO con el hash de la DB
-        boolean matches = passwordEncoder.matches(loginDto.getPassword(), userModel.getPassword());
+        Authentication authentication = this.authenticationManager(email, pass);
 
-        if (matches) {
-            // 4. MAPEO a LoginDto (para devolver la respuesta)
-            LoginDto toLoginDto = new LoginDto();
-            toLoginDto.setEmail(userModel.getEmail());
-            // IMPORTANTE: Nunca devuelvas la contraseña en el DTO de respuesta
-
-            return toLoginDto;
+        if (!authentication.isAuthenticated() || Objects.equals(authentication.getPrincipal(), "anonymousUser")) {
+            throw new AuthenticationNotFound("Usuario no autorizado");
         }
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        // crear token
+        return new LoginResponse(
+                userModel.getId(),
+                userModel.getEmail(),
+                userModel.getUsername(),
+                userModel.getRole()
+        );
+    }
 
-        return null; // Si la contraseña no coincide
+    private Authentication authenticationManager(String email, String password) {
+        return authenticateUser.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.api.hateoas.controller;
 import com.api.hateoas.dto.CuentaDto;
+import com.api.hateoas.dto.DepositarRequest;
 import com.api.hateoas.model.Cuenta;
 import com.api.hateoas.service.CuentaService;
 import org.springframework.http.HttpStatus;
@@ -15,15 +16,22 @@ public class CuentaController {
 
     public CuentaController(CuentaService cuentaService) {this.cuentaService = cuentaService;}
 
+    @PostMapping("/guardar-con-dto")
+    public ResponseEntity guardarCuenta(@RequestBody CuentaDto cuentaDto){
+        Cuenta cuentaBBDD = cuentaService.save(cuentaDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(cuentaBBDD);
+    }
+
     @GetMapping("/listar-cuentas")
     public ResponseEntity<List<Cuenta>> listarCuentas() {
         List<Cuenta> cuentas = cuentaService.listAll();
         if (cuentas.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return new ResponseEntity<>(cuentas, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(cuentas);
     }
-
 
     @GetMapping("/listar-id")
     public ResponseEntity<Cuenta> listarCuenta(@RequestParam(value = "id") Integer id){
@@ -35,21 +43,11 @@ public class CuentaController {
         }
     }
 
-    @PostMapping("/guardar-sin-dto")
-    public ResponseEntity<Cuenta> guardarCuenta(@RequestBody Cuenta cuenta){
-        Cuenta cuentaBBDD = cuentaService.save(cuenta);
-        return new ResponseEntity<>(cuenta, HttpStatus.CREATED);
-    }
 
-    @PostMapping("/guardar-con-dto")
-    public ResponseEntity guardarCuenta2(@RequestBody CuentaDto cuentaDto){
-        Cuenta cuentaBBDD = cuentaService.save2(cuentaDto);
-        return new ResponseEntity<>(cuentaBBDD, HttpStatus.CREATED);
-    }
 
     @PutMapping("/editar-cuenta")
-    public ResponseEntity<Cuenta> editarCuenta(@RequestBody Cuenta cuenta){
-        Cuenta cuentaBBDD = cuentaService.save(cuenta);
+    public ResponseEntity<Cuenta> editarCuenta(@RequestBody CuentaDto cuentaDto){
+        Cuenta cuentaBBDD = cuentaService.save(cuentaDto);
         return ResponseEntity.status(HttpStatus.OK).body(cuentaBBDD);
     }
 
@@ -61,6 +59,12 @@ public class CuentaController {
         }catch (Exception exception){
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/depositar")
+    public ResponseEntity depositar(@RequestBody DepositarRequest depositarRequest){
+        cuentaService.depositar(depositarRequest);
+        return ResponseEntity.status(HttpStatus.OK).body("Deposito exitoso");
     }
 
 
