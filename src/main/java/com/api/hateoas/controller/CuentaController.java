@@ -16,55 +16,40 @@ public class CuentaController {
 
     public CuentaController(CuentaService cuentaService) {this.cuentaService = cuentaService;}
 
-    @PostMapping("/guardar-con-dto")
-    public ResponseEntity guardarCuenta(@RequestBody CuentaDto cuentaDto){
-        Cuenta cuentaBBDD = cuentaService.save(cuentaDto);
+    @PostMapping("/crearcuenta")
+    public ResponseEntity<Cuenta> crearCuenta(@RequestBody CuentaDto cuentaDto){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(cuentaBBDD);
+                .body(cuentaService.save(cuentaDto));
     }
 
-    @GetMapping("/listar-cuentas")
+    @GetMapping("/listarcuentas")
     public ResponseEntity<List<Cuenta>> listarCuentas() {
-        List<Cuenta> cuentas = cuentaService.listAll();
-        if (cuentas.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(cuentas);
+        return ResponseEntity.ok(cuentaService.listarCuentas());
     }
 
-    @GetMapping("/listar-id")
-    public ResponseEntity<Cuenta> listarCuenta(@RequestParam(value = "id") Integer id){
-        try{
-            Cuenta cuenta = cuentaService.get(id);
-            return new ResponseEntity<>(cuenta, HttpStatus.OK);
-        }catch (Exception exception){
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/obtenercuenta/{id}")
+    public ResponseEntity<Cuenta> obtenerCuenta(@PathVariable Integer id) {
+        return ResponseEntity.ok(cuentaService.getId(id));
     }
 
-
-
-    @PutMapping("/editar-cuenta")
-    public ResponseEntity<Cuenta> editarCuenta(@RequestBody CuentaDto cuentaDto){
-        Cuenta cuentaBBDD = cuentaService.save(cuentaDto);
-        return ResponseEntity.status(HttpStatus.OK).body(cuentaBBDD);
+    @PutMapping("/editarcuenta/{id}")
+    public ResponseEntity<Cuenta> editarCuenta(
+            @PathVariable Integer id,
+            @RequestBody CuentaDto cuentaDto) {
+        return ResponseEntity.ok(cuentaService.editarCuenta(id, cuentaDto));
     }
 
-    @DeleteMapping("/eliminar-cuenta")
-    public ResponseEntity<?> eliminarCuenta(@RequestParam(value = "id") Integer id){
-        try{
-            cuentaService.delete(id);
-            return ResponseEntity.noContent().build();
-        }catch (Exception exception){
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping("/depositar/{id}")
+    public ResponseEntity<Void> depositarMonto(@RequestBody DepositarRequest request) {
+        cuentaService.depositarMonto(request);
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/depositar")
-    public ResponseEntity depositar(@RequestBody DepositarRequest depositarRequest){
-        cuentaService.depositar(depositarRequest);
-        return ResponseEntity.status(HttpStatus.OK).body("Deposito exitoso");
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<Void> eliminarCuenta(@PathVariable Integer id) {
+        cuentaService.eliminarCuenta(id);
+        return ResponseEntity.noContent().build();
     }
 
 

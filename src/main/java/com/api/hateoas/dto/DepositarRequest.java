@@ -6,4 +6,8 @@ import lombok.Data;
 public class DepositarRequest {
     private String numCuenta;
     private int monto;
+
+    public Integer getIdCuenta() {
+        return 0;
+    }
 }

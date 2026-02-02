@@ -1,11 +1,11 @@
 package com.api.hateoas.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
 @Entity
+@Data
 @Table(name = "cuentas")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +20,12 @@ public class Cuenta extends RepresentationModel<Cuenta> {
 
     private float monto;
 
+    public void setMonto(Float monto) { this.monto = monto; }
+
+
+    public Cuenta(String numeroDeCuenta, float monto) {
+        this.numeroDeCuenta = numeroDeCuenta;
+        this.monto = monto;}
 }
 
 

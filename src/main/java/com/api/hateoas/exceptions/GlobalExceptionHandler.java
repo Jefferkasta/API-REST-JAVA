@@ -19,8 +19,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneric(Exception ex) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        problem.setTitle("Error interno");
-        problem.setDetail("Ocurrió un error inesperado");
+        problem.setTitle("Error interno, ñero");
+        problem.setDetail("Ocurrió un error inesperado prro");
         return problem;
     }
 
