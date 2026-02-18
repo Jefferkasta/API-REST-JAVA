@@ -14,14 +14,12 @@ public class Cuenta extends RepresentationModel<Cuenta> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @Column(length = 20,nullable = false, unique = true)
     private String numeroDeCuenta;
-
     private float monto;
 
-    public void setMonto(Float monto) { this.monto = monto; }
 
+    public void setMonto(Float monto) { this.monto = monto; }
 
     public Cuenta(String numeroDeCuenta, float monto) {
         this.numeroDeCuenta = numeroDeCuenta;
